@@ -1,0 +1,50 @@
+
+import streamlit as st
+import json
+from my_component import my_component
+import requests
+
+# Add some test code to play with the component while it's in development.
+# During development, we can run this just as we would any other Streamlit
+# app: `$ streamlit run my_component/example.py`
+
+st.header("Company Analysis")
+st.subheader("Find companies with the map below to analyze")
+# Create an instance of our component with a constant `name` arg, and
+# print its output value.
+place_id = my_component("World")
+
+st.markdown("Couldnt find what you were looking for? Scrape the internet:")
+place_name_notfound=st.text_input("Find a company..", "Google")
+
+if place_id:
+	place_details=json.loads(place_id)
+#dict_place_details=json.loads(place_details)
+	print(place_details)
+# {"formatted_address":"Jl. Ahmad Yani No.1, RT.004/RW.001, Pekayon Jaya, Kec. Bekasi Sel., Kota Bks, Jawa Barat 17144, Indonesia","geometry":{"location":{"lat":-6.2511755,"lng":106.9911411},"viewport":{"south":-6.252499130291502,"west":106.9897945197085,"north":-6.249801169708498,"east":106.9924924802915}}
+#,"name":"PT. Mega Utama Development","place_id":"ChIJfYNPXGuNaS4R-CciOJToKHU","html_attributions":[]} 
+
+	st.code(place_details["name"], language="markdown")
+
+	result = st.button("Analyze")
+	if result:
+        place_api_response = requests.get("https://maps.googleapis.com/maps/api/place/details/json?place_id=" + place_details["place_id"] + "&key=AIzaSyAt6okO3SqWmJVfyLh4i7DBpby7Ptxre8g")
+        place_api_data = json.loads(place_api_response.json())
+        print(place_api_data["status"])
+else:
+	st.text("input something..")
+
+t.markdown("---")
+st.subheader("Component with variable args")
+
+# Create a second instance of our component whose `name` arg will vary
+# based on a text_input widget.
+#
+# We use the special "key" argument to assign a fixed identity to this
+# component instance. By default, when a component's arguments change,
+# it is considered a new instance and will be re-mounted on the frontend
+# and lose its current state. In this case, we want to vary the component's
+# "name" argument without having it get recreated.
+name_input = st.text_input("Enter a name", value="Streamlit")
+num_clicks = my_component(name_input, key="foo")
+st.markdown("You've clicked %s times!" % int(num_clicks))
